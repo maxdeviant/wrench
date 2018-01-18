@@ -15,14 +15,6 @@ class Option {
   isNone() {
     return _type == "none"
   }
-  
-  map(f) {
-    if (isSome()) {
-      return Option.Some(f.call(_value))
-    } else {
-      return Option.None()
-    }
-  }
 
   bind(f) {
     if (isSome()) {
@@ -30,6 +22,10 @@ class Option {
     } else {
       return Option.None()
     }
+  }
+
+  map(f) {
+    return this.bind(Fn.new {|s| Option.Some(f.call(s))})
   }
 
   match(Some, None) {
@@ -48,4 +44,3 @@ class Option {
     }
   }
 }
-
