@@ -25,7 +25,7 @@ class Option {
   }
 
   map(f) {
-    return this.bind(Fn.new {|s| Option.Some(f.call(s))})
+    return bind(Fn.new {|s| Option.Some(f.call(s))})
   }
 
   match(Some, None) {
