@@ -1,3 +1,5 @@
+import "invariant" for Invariant
+
 class Option {
   construct Some(value) {
     _type = "some"
@@ -24,11 +26,15 @@ class Option {
     return bind(Fn.new {|s| Option.Some(f.call(s))})
   }
 
-  match(Some, None) {
+  match(matchers) {
+    var someFn = matchers["Some"]
+    Invariant.check(someFn is Fn, "Option.match: Must provide a \"Some\" case.")
+    var noneFn = matchers["None"]
+    Invariant.check(noneFn is Fn, "Option.match: Must provide a \"None\" case.")
     if (isSome) {
-      return Some.call(_value)
+      return matchers["Some"].call(_value)
     } else {
-      return None.call()
+      return matchers["None"].call()
     }
   }
 

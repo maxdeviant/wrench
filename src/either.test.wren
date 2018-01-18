@@ -1,4 +1,4 @@
-import "../either" for Either
+import "either" for Either
 
 var rightEither = Either.Right("Hello")
 System.print(rightEither.toString)
