@@ -7,10 +7,10 @@ System.print(rightEither.isLeft)
 System.print(rightEither.map {|r| r + ", Sailor!"})
 System.print(
   "Matched with " +
-  rightEither.match(
-    Fn.new {"Left"},
-    Fn.new {|right| right}
-  )
+  rightEither.match({
+    "Left": Fn.new {"Left"},
+    "Right": Fn.new {|right| right}
+  })
 )
 
 var leftEither = Either.Left("Goodbye")
@@ -20,8 +20,8 @@ System.print(leftEither.isLeft)
 System.print(leftEither.map {|r| r + ", Sailor!"})
 System.print(
   "Matched with " +
-  leftEither.match(
-    Fn.new {|left| left},
-    Fn.new {"Right"}
-  )
+  leftEither.match({
+    "Left": Fn.new {|left| left},
+    "Right": Fn.new {"Right"}
+  })
 )

@@ -1,3 +1,5 @@
+import "invariant" for Invariant
+
 class Either {
   construct Left(left) {
     _type = "left"
@@ -25,7 +27,11 @@ class Either {
     return bind(Fn.new {|r| Either.Right(f.call(r))})
   }
 
-  match(leftFn, rightFn) {
+  match(matchers) {
+    var leftFn = matchers["Left"]
+    Invariant.check(leftFn is Fn, "Either.match: Must provide a \"Left\" case.")
+    var rightFn = matchers["Right"]
+    Invariant.check(rightFn is Fn, "Either.match: Must provide a \"Right\" case.")
     if (isRight) {
       return rightFn.call(_right)
     } else {
