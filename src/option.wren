@@ -32,9 +32,9 @@ class Option {
     var noneFn = matchers["None"]
     Invariant.check(noneFn is Fn, "Option.match: Must provide a \"None\" case.")
     if (isSome) {
-      return matchers["Some"].call(_value)
+      return someFn.call(_value)
     } else {
-      return matchers["None"].call()
+      return noneFn.call()
     }
   }
 
