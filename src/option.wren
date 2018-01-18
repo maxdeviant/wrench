@@ -8,16 +8,12 @@ class Option {
     _type = "none"
   }
 
-  isSome() {
-    return _type == "some"
-  }
+  isSome { _type == "some" }
 
-  isNone() {
-    return _type == "none"
-  }
+  isNone { _type == "none" }
 
   bind(f) {
-    if (isSome()) {
+    if (isSome) {
       return f.call(_value)
     } else {
       return Option.None()
@@ -29,7 +25,7 @@ class Option {
   }
 
   match(Some, None) {
-    if (isSome()) {
+    if (isSome) {
       return Some.call(_value)
     } else {
       return None.call()
@@ -37,7 +33,7 @@ class Option {
   }
 
   toString {
-    if (isSome()) {
+    if (isSome) {
       return "Some(" + _value + ")"
     } else {
       return "None()"
