@@ -36,7 +36,7 @@ class Option {
     }
   }
 
-  toString() {
+  toString {
     if (isSome()) {
       return "Some(" + _value + ")"
     } else {
