@@ -14,10 +14,7 @@ class Tree is Union {
   }
 
   construct new(value) {
-    super({ 
-      Leaf: Fn.new {Leaf.new()},
-      Node: Fn.new {|value, left, right| Node.new(value, left, right)}
-    }, value)
+    super([Leaf, Node], value)
   }
 
   toString { Tree.name }

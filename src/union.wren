@@ -7,12 +7,12 @@ class Union {
   }
 
   match(matchers) {
-    for (key in _cases.keys) {
-      Invariant.check(matchers.containsKey(key), "%(this.toString).match: Match not exhaustive; missing %(key).")
+    _cases.each {|case|
+      Invariant.check(matchers.containsKey(case), "%(this.toString).match: Match not exhaustive; missing %(case).")
     }
 
     for (key in matchers.keys) {
-      if (_cases.containsKey(key) && _value.identifier == key) {
+      if (_cases.contains(key) && _value.identifier == key) {
         return matchers[key].call(_value)
       }
     }
