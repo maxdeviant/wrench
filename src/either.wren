@@ -34,6 +34,9 @@ class Either {
     Invariant.check(leftFn is Fn, "Either.match: Must provide a \"Left\" case.")
     var rightFn = matchers["Right"]
     Invariant.check(rightFn is Fn, "Either.match: Must provide a \"Right\" case.")
+    // @TODO Sort the keys since we can't depend on the built-in order of `.keys`
+    var invalidKeys = matchers.keys.where {|k| k != "Left" && k != "Right"}
+    Invariant.check(invalidKeys.count == 0, "Either.match: The following cases are invalid: %(invalidKeys.map {|k| "\"%(k)\""}.join(", "))")
     if (isRight) {
       return rightFn.call(_right)
     } else {

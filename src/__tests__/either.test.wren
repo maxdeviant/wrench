@@ -72,6 +72,53 @@ var TestEither = Suite.new("Either") {|it|
         })
       ).toEqual(5)
     }
+
+    it.should("require a Right case") {
+      Expect.call(
+        Fiber.new {
+          Either.Right(1).match({
+            "Foo": Fn.new {|r| r},
+            "Left": Fn.new {|l| l}
+          })
+        }
+      ).toBeARuntimeError("Either.match: Must provide a \"Right\" case.")
+    }
+
+    it.should("require a Left case") {
+      Expect.call(
+        Fiber.new {
+          Either.Right(1).match({
+            "Right": Fn.new {|r| r},
+            "Bar": Fn.new {|l| l}
+          })
+        }
+      ).toBeARuntimeError("Either.match: Must provide a \"Left\" case.")
+    }
+
+    it.should("disallow invalid cases") {
+      Expect.call(
+        Fiber.new {
+          Either.Right(1).match({
+            "Right": Fn.new {|r| r},
+            "Left": Fn.new {|l| l},
+            "Foo": Fn.new {|x| x}
+          })
+        }
+      ).toBeARuntimeError("Either.match: The following cases are invalid: \"Foo\"")
+
+      Expect.call(
+        Fiber.new {
+          Either.Right(1).match({
+            "Right": Fn.new {|r| r},
+            "Left": Fn.new {|l| l},
+            "Foo": Fn.new {|x| x},
+            "Bar": Fn.new {|x| x},
+            "Baz": Fn.new {|x| x}
+          })
+        }
+      // @TODO We want to check the error message here, but we'll need to sort it first.
+      ).toBeARuntimeError
+    }
   }
 
   it.suite(".toString") {|it|
