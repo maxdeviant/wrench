@@ -4,17 +4,15 @@ import "either" for Either
 var EitherTests = Suite.new("Either") {|it|
   it.suite(".Right") {|it|
     it.should("produce a Right") {
-      var either = Either.Right("Hello")
-      Expect.call(either).toBe(Either)
-      Expect.call(either.toString).toEqual("Right(Hello)")
+      Expect.call(Either.Right("Hello")).toBe(Either)
+      Expect.call(Either.Right("Hello")).toEqual(Either.Right("Hello"))
     }
   }
 
   it.suite(".Left") {|it|
     it.should("produce a Left") {
-      var either = Either.Left("Goodbye")
-      Expect.call(either).toBe(Either)
-      Expect.call(either.toString).toEqual("Left(Goodbye)")
+      Expect.call(Either.Left("Goodbye")).toBe(Either)
+      Expect.call(Either.Left("Goodbye")).toEqual(Either.Left("Goodbye"))
     }
   }
 
