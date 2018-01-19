@@ -40,7 +40,19 @@ var EitherTests = Suite.new("Either") {|it|
 
   it.suite(".map") {|it|
     it.should("run the transform when Right").skip {
-      
+
+    }
+  }
+
+  it.suite(".toString") {|it|
+    it.should("return a string representation of a Right") {
+      Expect.call(Either.Right("Hello, Sailor!").toString).toEqual("Right(Hello, Sailor!)")
+      Expect.call(Either.Right(99).toString).toEqual("Right(99)")
+    }
+
+    it.should("return a string representation of a Left") {
+      Expect.call(Either.Left("Farewell, Sailor!").toString).toEqual("Left(Farewell, Sailor!)")
+      Expect.call(Either.Left(-1).toString).toEqual("Left(-1)")
     }
   }
 }

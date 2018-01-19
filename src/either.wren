@@ -41,9 +41,9 @@ class Either {
 
   toString {
     if (isRight) {
-      return "Right(" + _right + ")"
+      return "Right(" + _right.toString + ")"
     } else {
-      return "Left(" + _left + ")"
+      return "Left(" + _left.toString + ")"
     }
   }
 }
