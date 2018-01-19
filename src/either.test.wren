@@ -7,12 +7,20 @@ var EitherTests = Suite.new("Either") {|it|
       Expect.call(Either.Right("Hello")).toBe(Either)
       Expect.call(Either.Right("Hello")).toEqual(Either.Right("Hello"))
     }
+
+    it.should("not allow null") {
+      Expect.call(Fiber.new {Either.Right(null)}).toBeARuntimeError("Either.Right: Value cannot be null.")
+    }
   }
 
   it.suite(".Left") {|it|
     it.should("produce a Left") {
       Expect.call(Either.Left("Goodbye")).toBe(Either)
       Expect.call(Either.Left("Goodbye")).toEqual(Either.Left("Goodbye"))
+    }
+
+    it.should("not allow null") {
+      Expect.call(Fiber.new {Either.Left(null)}).toBeARuntimeError("Either.Left: Value cannot be null.")
     }
   }
 
