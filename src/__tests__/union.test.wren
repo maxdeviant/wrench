@@ -2,8 +2,19 @@ import "wren-test" for Expect, Suite
 import "union" for Union, Case
 
 class Tree is Union {
+  // @TODO It would be nice if we could use constructor names here
+  // like construct Leaf() and construct Node(value, left, right),
+  // but sadly this doesn't play nice with `super`.
+  static Leaf() {
+    return Tree.new(Leaf.new())
+  }
+
+  static Node(value, left, right) {
+    return Tree.new(Node.new(value, left, right))
+  }
+
   construct new(value) {
-    super({
+    super({ 
       Leaf: Fn.new {Leaf.new()},
       Node: Fn.new {|value, left, right| Node.new(value, left, right)}
     }, value)
@@ -33,14 +44,14 @@ var TestUnion = Suite.new("Union") {|it|
   it.suite(".match") {|it|
     it.should("match on the cases") {
       Expect.call(
-        Tree.new(Leaf.new()).match({
+        Tree.Leaf().match({
           Leaf: Fn.new {"This is a leaf."},
           Node: Fn.new {"This is a node."}
         })
       ).toEqual("This is a leaf.")
 
       Expect.call(
-        Tree.new(Node.new(5, Leaf.new(), Leaf.new())).match({
+        Tree.Node(5, Tree.Leaf(), Tree.Leaf()).match({
           Leaf: Fn.new {-1},
           Node: Fn.new {|node| node.value}
         })
@@ -50,7 +61,7 @@ var TestUnion = Suite.new("Union") {|it|
     it.should("require exhaustive matches") {
       Expect.call(
         Fiber.new {
-          Tree.new(Leaf.new()).match({
+          Tree.Leaf().match({
             Leaf: Fn.new {"This is a leaf."}
           })
         }
