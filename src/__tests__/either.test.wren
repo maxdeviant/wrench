@@ -1,5 +1,5 @@
 import "wren-test" for Expect, Suite
-import "either" for Either
+import "either" for Either, Right, Left
 
 var TestEither = Suite.new("Either") {|it|
   it.suite(".Right") {|it|
@@ -9,7 +9,7 @@ var TestEither = Suite.new("Either") {|it|
     }
 
     it.should("not allow null") {
-      Expect.call(Fiber.new {Either.Right(null)}).toBeARuntimeError("Either.Right: Value cannot be null.")
+      Expect.call(Fiber.new {Either.Right(null)}).toBeARuntimeError("Right.new: Value cannot be null.")
     }
   }
 
@@ -20,7 +20,7 @@ var TestEither = Suite.new("Either") {|it|
     }
 
     it.should("not allow null") {
-      Expect.call(Fiber.new {Either.Left(null)}).toBeARuntimeError("Either.Left: Value cannot be null.")
+      Expect.call(Fiber.new {Either.Left(null)}).toBeARuntimeError("Left.new: Value cannot be null.")
     }
   }
 
@@ -58,8 +58,8 @@ var TestEither = Suite.new("Either") {|it|
     it.should("match the Right case when Right") {
       Expect.call(
         Either.Right(2).match({
-          "Right": Fn.new {|r| r},
-          "Left": Fn.new {0}
+          Right: Fn.new {|r| r},
+          Left: Fn.new {0}
         })
       ).toEqual(2)
     }
@@ -67,57 +67,10 @@ var TestEither = Suite.new("Either") {|it|
     it.should("match the Left case when Left") {
       Expect.call(
         Either.Left(5).match({
-          "Right": Fn.new {0},
-          "Left": Fn.new {|l| l}
+          Right: Fn.new {0},
+          Left: Fn.new {|l| l}
         })
       ).toEqual(5)
-    }
-
-    it.should("require a Right case") {
-      Expect.call(
-        Fiber.new {
-          Either.Right(1).match({
-            "Foo": Fn.new {|r| r},
-            "Left": Fn.new {|l| l}
-          })
-        }
-      ).toBeARuntimeError("Either.match: Must provide a \"Right\" case.")
-    }
-
-    it.should("require a Left case") {
-      Expect.call(
-        Fiber.new {
-          Either.Right(1).match({
-            "Right": Fn.new {|r| r},
-            "Bar": Fn.new {|l| l}
-          })
-        }
-      ).toBeARuntimeError("Either.match: Must provide a \"Left\" case.")
-    }
-
-    it.should("disallow invalid cases") {
-      Expect.call(
-        Fiber.new {
-          Either.Right(1).match({
-            "Right": Fn.new {|r| r},
-            "Left": Fn.new {|l| l},
-            "Foo": Fn.new {|x| x}
-          })
-        }
-      ).toBeARuntimeError("Either.match: The following cases are invalid: \"Foo\"")
-
-      Expect.call(
-        Fiber.new {
-          Either.Right(1).match({
-            "Right": Fn.new {|r| r},
-            "Left": Fn.new {|l| l},
-            "Foo": Fn.new {|x| x},
-            "Bar": Fn.new {|x| x},
-            "Baz": Fn.new {|x| x}
-          })
-        }
-      // @TODO We want to check the error message here, but we'll need to sort it first.
-      ).toBeARuntimeError
     }
   }
 

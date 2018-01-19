@@ -1,19 +1,19 @@
 import "invariant" for Invariant
 
 class Union {
-  construct new(cases, value) {
-    _cases = cases
-    _value = value
+  construct new(validCases, case) {
+    _validCases = validCases
+    _case = case
   }
 
   match(matchers) {
-    _cases.each {|case|
+    _validCases.each {|case|
       Invariant.check(matchers.containsKey(case), "%(this.toString).match: Match not exhaustive; missing %(case).")
     }
 
     for (key in matchers.keys) {
-      if (_cases.contains(key) && _value.identifier == key) {
-        return _value.match(matchers[key])
+      if (_validCases.contains(key) && _case.identifier == key) {
+        return _case.match(matchers[key])
       }
     }
 
@@ -30,5 +30,5 @@ class Case {
 
   identifier { _identifier }
 
-  match(fn) { fn.call() }
+  match(f) { f.call() }
 }

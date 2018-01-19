@@ -13,8 +13,8 @@ class Tree is Union {
     return Tree.new(Node.new(value, left, right))
   }
 
-  construct new(value) {
-    super([Leaf, Node], value)
+  construct new(case) {
+    super([Leaf, Node], case)
   }
 
   toString { Tree.name }
@@ -34,7 +34,7 @@ class Node is Case {
     _right = right
   }
 
-  match(fn) { fn.call(_value, _left, _right) }
+  match(f) { f.call(_value, _left, _right) }
 }
 
 var TestUnion = Suite.new("Union") {|it|

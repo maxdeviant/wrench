@@ -1,74 +1,76 @@
 import "invariant" for Invariant
+import "union" for Union, Case
 
-class Either {
-  construct Right(right) {
-    Invariant.check(right != null, "Either.Right: Value cannot be null.")
-    _kind = "right"
-    _right = right
+class Either is Union {
+  static Right(right) {
+    return Either.new(Right.new(right))
   }
 
-  construct Left(left) {
-    Invariant.check(left != null, "Either.Left: Value cannot be null.")
-    _kind = "left"
-    _left = left
+  static Left(left) {
+    return Either.new(Left.new(left))
   }
 
-  isRight { _kind == "right" }
+  construct new(case) {
+    super([Right, Left], case)
+    _case = case
+  }
 
-  isLeft { _kind == "left" }
+  isRight { _case is Right }
+
+  isLeft { _case is Left }
 
   bind(f) {
-    if (isRight) {
-      return f.call(_right)
-    } else {
-      return Either.Left(_left)
-    }
+    return match({
+      Right: Fn.new {|right| f.call(right)},
+      Left: Fn.new {|left| Either.Left(left)}
+    })
   }
 
   map(f) {
     return bind(Fn.new {|r| Either.Right(f.call(r))})
   }
 
-  match(matchers) {
-    var leftFn = matchers["Left"]
-    Invariant.check(leftFn is Fn, "Either.match: Must provide a \"Left\" case.")
-    var rightFn = matchers["Right"]
-    Invariant.check(rightFn is Fn, "Either.match: Must provide a \"Right\" case.")
-    // @TODO Sort the keys since we can't depend on the built-in order of `.keys`
-    var invalidKeys = matchers.keys.where {|k| k != "Left" && k != "Right"}
-    Invariant.check(invalidKeys.count == 0, Fn.new {
-      var invalidCases = invalidKeys.map {|k| "\"%(k)\""}.join(", ")
-      return "Either.match: The following cases are invalid: %(invalidCases)"
-    })
-    if (isRight) {
-      return rightFn.call(_right)
-    } else {
-      return leftFn.call(_left)
-    }
-  }
+  toString { _case.toString }
 
-  toString {
-    if (isRight) {
-      return "Right(%(_right))"
-    } else {
-      return "Left(%(_left))"
-    }
-  }
-
+  // @TODO See if we can move this up into Union.
   ==(other) {
     return match({
-      "Right": Fn.new {|right|
+      Right: Fn.new {|right|
         return other.match({
-          "Right": Fn.new {|otherRight| right == otherRight},
-          "Left": Fn.new {false}
+          Right: Fn.new {|otherRight| right == otherRight},
+          Left: Fn.new {false}
         })
       },
-      "Left": Fn.new {|left|
+      Left: Fn.new {|left|
         return other.match({
-          "Right": Fn.new {false},
-          "Left": Fn.new {|otherLeft| left == otherLeft}
+          Right: Fn.new {false},
+          Left: Fn.new {|otherLeft| left == otherLeft}
         })
       }
     })
   }
+}
+
+class Right is Case {
+  construct new(right) {
+    Invariant.check(right != null, "Right.new: Value cannot be null.")
+    super(Right)
+    _right = right
+  }
+
+  match(f) { f.call(_right) }
+
+  toString { "Right(%(_right))" }
+}
+
+class Left is Case {
+  construct new(left) {
+    Invariant.check(left != null, "Left.new: Value cannot be null.")
+    super(Left)
+    _left = left
+  }
+
+  match(f) { f.call(_left) }
+
+  toString { "Left(%(_left))" }
 }
