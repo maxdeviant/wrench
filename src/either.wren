@@ -41,9 +41,9 @@ class Either {
 
   toString {
     if (isRight) {
-      return "Right(" + _right.toString + ")"
+      return "Right(%(_right))"
     } else {
-      return "Left(" + _left.toString + ")"
+      return "Left(%(_left))"
     }
   }
 
