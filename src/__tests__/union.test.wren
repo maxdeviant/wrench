@@ -1,6 +1,17 @@
 import "wren-test" for Expect, Suite
 import "union" for Union, Case
 
+class Tree is Union {
+  construct new(value) {
+    super({
+      Leaf: Fn.new {Leaf.new()},
+      Node: Fn.new {|value, left, right| Node.new(value, left, right)}
+    }, value)
+  }
+
+  toString { Tree.name }
+}
+
 class Leaf is Case {
   construct new() {
     super(Leaf)
@@ -16,17 +27,6 @@ class Node is Case {
   }
 
   value { _value }
-}
-
-class Tree is Union {
-  construct new(value) {
-    super({
-      Leaf: Fn.new {Leaf.new()},
-      Node: Fn.new {|value, left, right| Node.new(value, left, right)}
-    }, value)
-  }
-
-  toString { Tree.name }
 }
 
 var TestUnion = Suite.new("Union") {|it|
