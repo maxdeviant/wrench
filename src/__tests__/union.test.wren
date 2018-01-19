@@ -41,7 +41,7 @@ var TestUnion = Suite.new("Union") {|it|
       var nodeTree = Tree.new(Node.new(5, Leaf.new(), Leaf.new()))
       Expect.call(
         nodeTree.match({
-          Leaf: Fn.new {"leaf"},  
+          Leaf: Fn.new {-1},  
           Node: Fn.new {|node| node.value}
         })
       ).toEqual(5)
