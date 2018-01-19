@@ -1,21 +1,21 @@
 import "invariant" for Invariant
 
 class Either {
-  construct Left(left) {
-    Invariant.check(left != null, "Either.Left: Value cannot be null.")
-    _kind = "left"
-    _left = left
-  }
-
   construct Right(right) {
     Invariant.check(right != null, "Either.Right: Value cannot be null.")
     _kind = "right"
     _right = right
   }
 
-  isLeft { _kind == "left" }
+  construct Left(left) {
+    Invariant.check(left != null, "Either.Left: Value cannot be null.")
+    _kind = "left"
+    _left = left
+  }
 
   isRight { _kind == "right" }
+
+  isLeft { _kind == "left" }
 
   bind(f) {
     if (isRight) {
