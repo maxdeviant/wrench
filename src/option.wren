@@ -41,7 +41,7 @@ class Option {
 
   toString {
     if (isSome) {
-      return "Some(" + _value + ")"
+      return "Some(%(_value))"
     } else {
       return "None()"
     }
