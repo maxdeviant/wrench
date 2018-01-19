@@ -1,26 +1,15 @@
+import "wren-test" for Expect, Suite
 import "option" for Option
 
-var someOption = Option.Some("Some string.")
-System.print(someOption)
-System.print(someOption.isSome)
-System.print(someOption.isNone)
-System.print(someOption.map {|s| s + " Hello"})
-System.print(
-  "Matched with " +
-  someOption.match({
-    "Some": Fn.new {|some| some},
-    "None": Fn.new {"Bad"}
-  })
-)
+var TestOption = Suite.new("Option") {|it|
+  it.suite(".Some") {|it|
+    it.should("produce a Some") {
+      Expect.call(Option.Some("Hello")).toBe(Option)
+      Expect.call(Option.Some("Hello")).toEqual(Option.Some("Hello"))
+    }
 
-var noneOption = Option.None()
-System.print(noneOption)
-System.print(noneOption.isSome)
-System.print(noneOption.isNone)
-System.print(
-  "Matched with " +
-  someOption.match({
-    "Some": Fn.new {|some| some},
-    "None": Fn.new {"Bad"}
-  })
-)
+    it.should("not allow null") {
+      Expect.call(Fiber.new {Option.Some(null)}).toBeARuntimeError("Option.Some: Value cannot be null.")
+    }
+  }
+}

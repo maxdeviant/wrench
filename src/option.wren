@@ -2,17 +2,18 @@ import "invariant" for Invariant
 
 class Option {
   construct Some(value) {
-    _type = "some"
+    Invariant.check(value != null, "Option.Some: Value cannot be null.")
+    _kind = "some"
     _value = value
   }
 
   construct None() {
-    _type = "none"
+    _kind = "none"
   }
 
-  isSome { _type == "some" }
+  isSome { _kind == "some" }
 
-  isNone { _type == "none" }
+  isNone { _kind == "none" }
 
   bind(f) {
     if (isSome) {
@@ -44,5 +45,22 @@ class Option {
     } else {
       return "None()"
     }
+  }
+
+  ==(other) {
+    return match({
+      "Some": Fn.new {|some|
+        return other.match({
+          "Some": Fn.new {|otherSome| some == otherSome},
+          "None": Fn.new {false}
+        })
+      },
+      "None": Fn.new {
+        return other.match({
+          "Some": Fn.new {false},
+          "None": Fn.new {true}
+        })
+      }
+    })
   }
 }
