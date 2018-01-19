@@ -6,6 +6,8 @@ Small utilities for [Wren](https://github.com/munificent/wren).
 
 ## Getting Started
 
+> If you need help setting up Wren, head over [here](http://wren.io/getting-started.html).
+
 Download `wrench.wren` from the [Releases](https://github.com/maxdeviant/wrench/releases/latest/) page and place it in your project directory.
 
 ```c
