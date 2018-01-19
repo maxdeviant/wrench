@@ -1,27 +1,52 @@
+import "wren-test" for Expect, Suite, ConsoleReporter
 import "either" for Either
 
-var rightEither = Either.Right("Hello")
-System.print(rightEither.toString)
-System.print(rightEither.isRight)
-System.print(rightEither.isLeft)
-System.print(rightEither.map {|r| r + ", Sailor!"})
-System.print(
-  "Matched with " +
-  rightEither.match({
-    "Left": Fn.new {"Left"},
-    "Right": Fn.new {|right| right}
-  })
-)
+var EitherTests = Suite.new("Either") {|it|
+  it.suite(".Right") {|it|
+    it.should("produce a Right") {
+      var either = Either.Right("Hello")
+      Expect.call(either).toBe(Either)
+      Expect.call(either.toString).toEqual("Right(Hello)")
+    }
+  }
 
-var leftEither = Either.Left("Goodbye")
-System.print(leftEither.toString)
-System.print(leftEither.isRight)
-System.print(leftEither.isLeft)
-System.print(leftEither.map {|r| r + ", Sailor!"})
-System.print(
-  "Matched with " +
-  leftEither.match({
-    "Left": Fn.new {|left| left},
-    "Right": Fn.new {"Right"}
-  })
-)
+  it.suite(".Left") {|it|
+    it.should("produce a Left") {
+      var either = Either.Left("Goodbye")
+      Expect.call(either).toBe(Either)
+      Expect.call(either.toString).toEqual("Left(Goodbye)")
+    }
+  }
+
+  it.suite(".isRight") {|it|
+    it.should("return true when Right") {
+      Expect.call(Either.Right(10).isRight).toBeTrue
+    }
+
+    it.should("return false when Left") {
+      Expect.call(Either.Left("oops").isRight).toBeFalse
+    }
+  }
+
+  it.suite(".isLeft") {|it|
+    it.should("return true when Left") {
+      Expect.call(Either.Left("an error occurred").isLeft).toBeTrue
+    }
+
+    it.should("return false when Right") {
+      Expect.call(Either.Right(99).isLeft).toBeFalse
+    }
+  }
+
+  it.suite(".map") {|it|
+    it.should("run the transform when Right").skip {
+      
+    }
+  }
+}
+
+{
+  var reporter = ConsoleReporter.new()
+  EitherTests.run(reporter)
+  reporter.epilogue()
+}
