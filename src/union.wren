@@ -8,7 +8,7 @@ class Union {
 
   match(matchers) {
     for (key in _cases.keys) {
-      Invariant.check(matchers.containsKey(key), "%(this.toString).match: Match not exhaustive; missing \"%(key)\".")
+      Invariant.check(matchers.containsKey(key), "%(this.toString).match: Match not exhaustive; missing %(key).")
     }
 
     for (key in matchers.keys) {

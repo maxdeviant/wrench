@@ -5,8 +5,6 @@ class Leaf is Case {
   construct new() {
     super(Leaf)
   }
-
-  toString { Leaf.name }
 }
 
 class Node is Case {
@@ -18,8 +16,6 @@ class Node is Case {
   }
 
   value { _value }
-
-  toString { Node.name }
 }
 
 class Tree is Union {
@@ -58,7 +54,7 @@ var TestUnion = Suite.new("Union") {|it|
             Leaf: Fn.new {"This is a leaf."}
           })
         }
-      ).toBeARuntimeError("Tree.match: Match not exhaustive; missing \"Node\".")
+      ).toBeARuntimeError("Tree.match: Match not exhaustive; missing Node.")
     }
   }
 }
