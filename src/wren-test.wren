@@ -533,6 +533,201 @@ class Suite {
   }
 }
 
+/**
+ * A class of matchers to use for making assertions.
+ */
+class BaseMatchers {
+  /**
+   * Create a new `Matcher` object for a value.
+   *
+   * @param {*} value The value to be matched on.
+   */
+  construct new (value) {
+    _value = value
+  }
+
+  /**
+   * @return The value for which this matcher was constructed.
+   */
+  value { _value }
+
+  /**
+   * Negates this matcher and returns itself so that it can be chained with
+   * other matchers:
+   *
+   *     var matcher = Matchers.new("value")
+   *     matcher.not.toEqual("string") // Passing expectation.
+   *
+   * @return This instance of the classes that received this method.
+   */
+  not {
+    _negated = true
+
+    // Return this matcher to support chaining.
+    return this
+  }
+
+  /**
+   * Asserts that the value is of a given class.
+   *
+   * @param {Class} klass Class which the value should be an instacne of.
+   */
+  toBe (klass) {
+    var message = "Expected " + _value.toString + " of class " +
+        _value.type.toString + " to be of class " + klass.toString
+    report_(_value is klass, message)
+  }
+
+  /**
+   * Asserts that the value is false.
+   */
+  toBeFalse {
+    var message = "Expected " + _value.toString + " to be false"
+    report_(_value == false, message)
+  }
+
+  /**
+   * Asserts that the value is true.
+   */
+  toBeTrue {
+    var message = "Expected " + _value.toString + " to be true"
+    report_(_value == true, message)
+  }
+
+  /**
+   * Asserts that the value is null.
+   */
+  toBeNull {
+    var message = "Expected " + _value.toString + " to be null"
+    report_(_value == null, message)
+  }
+
+  /**
+   * Asserts that the value is equal to the given value.
+   *
+   * @param {*} other Object that this value should be equal to.
+   */
+  toEqual (other) {
+    var message = "Expected " + _value.toString + " to equal " +  other.toString
+    report_(_value == other, message)
+  }
+
+  report_ (result, message) {
+    result = _negated ? !result : result
+
+    var expectation = Expectation.new(result, message)
+    Fiber.yield(expectation)
+  }
+
+  /**
+   * Enforces that the value for this matcher instance is of a certain class. If
+   * the value is not of the specified type the current Fiber will be aborted
+   * with an error message.
+   *
+   * @param {Class} klass Type of which the value should be an instance.
+   */
+  enforceClass_ (klass) {
+    if (!(value is klass)) {
+      Fiber.abort(value.toString + " was not a " + klass.toString)
+    }
+  }
+}
+
+/**
+ * A class of matchers for making assertions about Fibers.
+ */
+class FiberMatchers is BaseMatchers {
+  /**
+   * Create a new `Matcher` object for a value.
+   *
+   * @param {*} value The value to be matched on.
+   */
+  construct new (value) {
+    super(value)
+  }
+
+  /**
+   * Assert that invoking this value as a fiber generated a runtime error.
+   */
+  toBeARuntimeError {
+    enforceClass_(Fiber)
+
+    // Run the fiber to generate the possible error.
+    value.try()
+
+    var message = "Expected a runtime error but it did not occur"
+    report_(value.error != null, message)
+  }
+
+  /**
+   * Assert that invoking this value as a fiber generated a runtime error with
+   * the given message.
+   *
+   * @param {String} errorMessage Error message that should have been generated
+   *                              by the fiber.
+   */
+  toBeARuntimeError (errorMessage) {
+    enforceClass_(Fiber)
+
+    // Run the fiber to generate the possible error.
+    while (!value.isDone) {
+      value.try()
+    }
+
+    if (value.error == null) {
+      var message = "Expected a runtime error but it did not occur"
+      report_(false, message)
+    } else {
+      var message = "Expected a runtime error with error: " + errorMessage +
+          " but got: " + value.error
+      report_(value.error == errorMessage, message)
+    }
+  }
+
+  /**
+   * Assert that the fiber is done.
+   */
+  toBeDone {
+    enforceClass_(Fiber)
+
+    var message = "Expected the fiber to be done"
+    report_(value.isDone, message)
+  }
+
+  /**
+   * Assert that invoking this fiber yields the expected value(s).
+   *
+   * @param shouldYield
+   */
+  /*toYield (shouldYield) {
+    enforceClass_(Fiber)
+
+    // If a bare value was passed coerce it into a list.
+    if (!(shouldYield is List)) { shouldYield = [shouldYield] }
+
+    var results = []
+
+    // Get all values that this fiber could yield.
+    while (!value.isDone) {
+      results.add(value.try())
+    }
+
+    // The last value yielded from any fiber before it finishes is null.
+    results.removeAt(results.size - 1)
+
+    if (value.error != null) {
+      var message = "Expected the fiber to yield `" + shouldYield.toString +
+          "` but instead got a runtime error with message: `" + value.error +
+          " and yielded `" + results.toString + "`"
+      report_(false, message)
+    } else {
+      var message = "Expected the fiber to yield `" + shouldYield.toString +
+          "` but instead it yielded `" + results.toString + "`"
+      report_(results.size == shouldYield.size, message)
+    }
+  }*/
+}
+
 class NumMatchers is FiberMatchers {
   /**
    * Create a new `Matcher` object for a value.
@@ -591,6 +786,78 @@ class Skippable {
    * @return {String} Title string of this Skippable.
    */
   title { _title }
+}
+
+var Symbols = {
+  "ok": "✓",
+  "err": "✖"
+}
+/**
+ * Defines the full interface for a test reporter.
+ */
+class Reporter {
+  /**
+   * Called when a test run is entirely finished and can be used to print a test
+   * summary for instance.
+   */
+  epilogue () {}
+
+  /**
+   * Called when a runnable is skipped.
+   *
+   * @param {Skippable} skippable Skippable object that represents the runnable
+   *                              that was skipped.
+   */
+  runnableSkipped (skippable) {}
+
+  /**
+   * Called when a suite run is started.
+   *
+   * @param {String} title Name of the suite that has been started.
+   */
+  suiteStart (title) {}
+
+  /**
+   * Called when a suite run is finished.
+   *
+   * @param {String} title Name of the suite that has been finished.
+   */
+  suiteEnd (title) {}
+
+  /**
+   * Called when a test is started.
+   *
+   * @param {Runnable} runnable Runnable object that is about to be run.
+   */
+  testStart (runnable) {}
+
+  /**
+   * Called when a test passed.
+   *
+   * @param {Runnable} runnable Runnable object that was successful.
+   */
+  testPassed (runnable) {}
+
+  /**
+   * Called when a test failed.
+   *
+   * @param {Runnable} runnable Runnable object that failed.
+   */
+  testFailed (runnable) {}
+
+  /**
+   * Called when a test encounters an error.
+   *
+   * @param {Runnable} runnable Runnable object that encountered an error.
+   */
+  testError (runnable) {}
+
+  /**
+   * Called when a test is finished.
+   *
+   * @param {Runnable} runnable Runnable object that just finished.
+   */
+  testEnd (runnable) {}
 }
 
 /**
@@ -707,81 +974,10 @@ class ConsoleReporter is Reporter {
   }
 }
 
-var Symbols = {
-  "ok": "✓",
-  "err": "✖"
-}
 /**
- * Defines the full interface for a test reporter.
+ * A class of matchers for making assertions about ranges.
  */
-class Reporter {
-  /**
-   * Called when a test run is entirely finished and can be used to print a test
-   * summary for instance.
-   */
-  epilogue () {}
-
-  /**
-   * Called when a runnable is skipped.
-   *
-   * @param {Skippable} skippable Skippable object that represents the runnable
-   *                              that was skipped.
-   */
-  runnableSkipped (skippable) {}
-
-  /**
-   * Called when a suite run is started.
-   *
-   * @param {String} title Name of the suite that has been started.
-   */
-  suiteStart (title) {}
-
-  /**
-   * Called when a suite run is finished.
-   *
-   * @param {String} title Name of the suite that has been finished.
-   */
-  suiteEnd (title) {}
-
-  /**
-   * Called when a test is started.
-   *
-   * @param {Runnable} runnable Runnable object that is about to be run.
-   */
-  testStart (runnable) {}
-
-  /**
-   * Called when a test passed.
-   *
-   * @param {Runnable} runnable Runnable object that was successful.
-   */
-  testPassed (runnable) {}
-
-  /**
-   * Called when a test failed.
-   *
-   * @param {Runnable} runnable Runnable object that failed.
-   */
-  testFailed (runnable) {}
-
-  /**
-   * Called when a test encounters an error.
-   *
-   * @param {Runnable} runnable Runnable object that encountered an error.
-   */
-  testError (runnable) {}
-
-  /**
-   * Called when a test is finished.
-   *
-   * @param {Runnable} runnable Runnable object that just finished.
-   */
-  testEnd (runnable) {}
-}
-/**
- * A class of matchers for making assertions about Fibers.
- */
-class FiberMatchers is BaseMatchers {
+class RangeMatchers is NumMatchers {
   /**
    * Create a new `Matcher` object for a value.
    *
@@ -792,85 +988,40 @@ class FiberMatchers is BaseMatchers {
   }
 
   /**
-   * Assert that invoking this value as a fiber generated a runtime error.
-   */
-  toBeARuntimeError {
-    enforceClass_(Fiber)
-
-    // Run the fiber to generate the possible error.
-    value.try()
-
-    var message = "Expected a runtime error but it did not occur"
-    report_(value.error != null, message)
-  }
-
-  /**
-   * Assert that invoking this value as a fiber generated a runtime error with
-   * the given message.
+   * Assert that the value contains the given range.
    *
-   * @param {String} errorMessage Error message that should have been generated
-   *                              by the fiber.
+   * @param {Range} other The range that should be contained within the range
+   *                      represented by the value.
    */
-  toBeARuntimeError (errorMessage) {
-    enforceClass_(Fiber)
+  toContain (other) {
+    enforceClass_(Range)
 
-    // Run the fiber to generate the possible error.
-    while (!value.isDone) {
-      value.try()
-    }
-
-    if (value.error == null) {
-      var message = "Expected a runtime error but it did not occur"
-      report_(false, message)
-    } else {
-      var message = "Expected a runtime error with error: " + errorMessage +
-          " but got: " + value.error
-      report_(value.error == errorMessage, message)
-    }
+    var result = rangeIsContainedBy_(value, other)
+    var message = "Expected " + value.toString + " to contain " + other.toString
+    report_(result, message)
   }
 
   /**
-   * Assert that the fiber is done.
-   */
-  toBeDone {
-    enforceClass_(Fiber)
-
-    var message = "Expected the fiber to be done"
-    report_(value.isDone, message)
-  }
-
-  /**
-   * Assert that invoking this fiber yields the expected value(s).
+   * Assert that the value is contained within the given range.
    *
-   * @param shouldYield
+   * @param {Range} other The range that should contain this range represented
+   *                      by the value.
    */
-  /*toYield (shouldYield) {
-    enforceClass_(Fiber)
+  toBeContainedBy (other) {
+    enforceClass_(Range)
 
-    // If a bare value was passed coerce it into a list.
-    if (!(shouldYield is List)) { shouldYield = [shouldYield] }
+    var result = rangeIsContainedBy_(other, value)
+    var message = "Expected " + value.toString + " to be contained by " +
+        other.toString
+    report_(result, message)
+  }
 
-    var results = []
+  rangeIsContainedBy_ (parent, child) {
+    var parentTo = parent.isInclusive ? parent.to : (parent.to - 1)
+    var childTo = child.isInclusive ? child.to : (child.to - 1)
 
-    // Get all values that this fiber could yield.
-    while (!value.isDone) {
-      results.add(value.try())
-    }
-
-    // The last value yielded from any fiber before it finishes is null.
-    results.removeAt(results.size - 1)
-
-    if (value.error != null) {
-      var message = "Expected the fiber to yield `" + shouldYield.toString +
-          "` but instead got a runtime error with message: `" + value.error +
-          " and yielded `" + results.toString + "`"
-      report_(false, message)
-    } else {
-      var message = "Expected the fiber to yield `" + shouldYield.toString +
-          "` but instead it yielded `" + results.toString + "`"
-      report_(results.size == shouldYield.size, message)
-    }
-  }*/
+    return (child.from >= parent.from) && (childTo <= parentTo)
+  }
 }
 
 class StubMatchers is RangeMatchers {
@@ -937,156 +1088,6 @@ class StubMatchers is RangeMatchers {
         args.toString + " but was never called. Calls were:\n    " +
         value.calls.join("\n    ")
     report_(false, message)
-  }
-}
-
-/**
- * A class of matchers for making assertions about ranges.
- */
-class RangeMatchers is NumMatchers {
-  /**
-   * Create a new `Matcher` object for a value.
-   *
-   * @param {*} value The value to be matched on.
-   */
-  construct new (value) {
-    super(value)
-  }
-
-  /**
-   * Assert that the value contains the given range.
-   *
-   * @param {Range} other The range that should be contained within the range
-   *                      represented by the value.
-   */
-  toContain (other) {
-    enforceClass_(Range)
-
-    var result = rangeIsContainedBy_(value, other)
-    var message = "Expected " + value.toString + " to contain " + other.toString
-    report_(result, message)
-  }
-
-  /**
-   * Assert that the value is contained within the given range.
-   *
-   * @param {Range} other The range that should contain this range represented
-   *                      by the value.
-   */
-  toBeContainedBy (other) {
-    enforceClass_(Range)
-
-    var result = rangeIsContainedBy_(other, value)
-    var message = "Expected " + value.toString + " to be contained by " +
-        other.toString
-    report_(result, message)
-  }
-
-  rangeIsContainedBy_ (parent, child) {
-    var parentTo = parent.isInclusive ? parent.to : (parent.to - 1)
-    var childTo = child.isInclusive ? child.to : (child.to - 1)
-
-    return (child.from >= parent.from) && (childTo <= parentTo)
-  }
-}
-
-/**
- * A class of matchers to use for making assertions.
- */
-class BaseMatchers {
-  /**
-   * Create a new `Matcher` object for a value.
-   *
-   * @param {*} value The value to be matched on.
-   */
-  construct new (value) {
-    _value = value
-  }
-
-  /**
-   * @return The value for which this matcher was constructed.
-   */
-  value { _value }
-
-  /**
-   * Negates this matcher and returns itself so that it can be chained with
-   * other matchers:
-   *
-   *     var matcher = Matchers.new("value")
-   *     matcher.not.toEqual("string") // Passing expectation.
-   *
-   * @return This instance of the classes that received this method.
-   */
-  not {
-    _negated = true
-
-    // Return this matcher to support chaining.
-    return this
-  }
-
-  /**
-   * Asserts that the value is of a given class.
-   *
-   * @param {Class} klass Class which the value should be an instacne of.
-   */
-  toBe (klass) {
-    var message = "Expected " + _value.toString + " of class " +
-        _value.type.toString + " to be of class " + klass.toString
-    report_(_value is klass, message)
-  }
-
-  /**
-   * Asserts that the value is false.
-   */
-  toBeFalse {
-    var message = "Expected " + _value.toString + " to be false"
-    report_(_value == false, message)
-  }
-
-  /**
-   * Asserts that the value is true.
-   */
-  toBeTrue {
-    var message = "Expected " + _value.toString + " to be true"
-    report_(_value == true, message)
-  }
-
-  /**
-   * Asserts that the value is null.
-   */
-  toBeNull {
-    var message = "Expected " + _value.toString + " to be null"
-    report_(_value == null, message)
-  }
-
-  /**
-   * Asserts that the value is equal to the given value.
-   *
-   * @param {*} other Object that this value should be equal to.
-   */
-  toEqual (other) {
-    var message = "Expected " + _value.toString + " to equal " +  other.toString
-    report_(_value == other, message)
-  }
-
-  report_ (result, message) {
-    result = _negated ? !result : result
-
-    var expectation = Expectation.new(result, message)
-    Fiber.yield(expectation)
-  }
-
-  /**
-   * Enforces that the value for this matcher instance is of a certain class. If
-   * the value is not of the specified type the current Fiber will be aborted
-   * with an error message.
-   *
-   * @param {Class} klass Type of which the value should be an instance.
-   */
-  enforceClass_ (klass) {
-    if (!(value is klass)) {
-      Fiber.abort(value.toString + " was not a " + klass.toString)
-    }
   }
 }
 
