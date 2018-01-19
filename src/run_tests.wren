@@ -1,8 +1,8 @@
 import "wren-test" for ConsoleReporter
 
-import "either.test" for TestEither
-import "invariant.test" for TestInvariant
-import "option.test" for TestOption
+import "__tests__/either.test" for TestEither
+import "__tests__/invariant.test" for TestInvariant
+import "__tests__/option.test" for TestOption
 
 var reporter = ConsoleReporter.new()
 
