@@ -2,18 +2,18 @@ import "invariant" for Invariant
 
 class Either {
   construct Left(left) {
-    _type = "left"
+    _kind = "left"
     _left = left
   }
 
   construct Right(right) {
-    _type = "right"
+    _kind = "right"
     _right = right
   }
 
-  isLeft { _type == "left" }
+  isLeft { _kind == "left" }
 
-  isRight { _type == "right" }
+  isRight { _kind == "right" }
 
   bind(f) {
     if (isRight) {
@@ -45,5 +45,22 @@ class Either {
     } else {
       return "Left(" + _left.toString + ")"
     }
+  }
+
+  ==(other) {
+    return match({
+      "Right": Fn.new {|right|
+        return other.match({
+          "Right": Fn.new {|otherRight| right == otherRight},
+          "Left": Fn.new {false}
+        })
+      },
+      "Left": Fn.new {|left|
+        return other.match({
+          "Right": Fn.new {false},
+          "Left": Fn.new {|otherLeft| left == otherLeft}
+        })
+      }
+    })
   }
 }

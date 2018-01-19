@@ -39,8 +39,32 @@ var EitherTests = Suite.new("Either") {|it|
   }
 
   it.suite(".map") {|it|
-    it.should("run the transform when Right").skip {
+    it.should("run the transform when Right") {
+      Expect.call(Either.Right(2).map {|x| x * x}).toEqual(Either.Right(4))
+    }
 
+    it.should("not run the transform when Left") {
+      Expect.call(Either.Left(2).map {|x| x * x}).toEqual(Either.Left(2))
+    }
+  }
+
+  it.suite(".match") {|it|
+    it.should("match the Right case when Right") {
+      Expect.call(
+        Either.Right(2).match({
+          "Right": Fn.new {|r| r},
+          "Left": Fn.new {0}
+        })
+      ).toEqual(2)
+    }
+
+    it.should("match the Left case when Left") {
+      Expect.call(
+        Either.Left(5).match({
+          "Right": Fn.new {0},
+          "Left": Fn.new {|l| l}
+        })
+      ).toEqual(5)
     }
   }
 
@@ -53,6 +77,19 @@ var EitherTests = Suite.new("Either") {|it|
     it.should("return a string representation of a Left") {
       Expect.call(Either.Left("Farewell, Sailor!").toString).toEqual("Left(Farewell, Sailor!)")
       Expect.call(Either.Left(-1).toString).toEqual("Left(-1)")
+    }
+  }
+
+  it.suite("==") {|it|
+    it.should("check if two Eithers are equal") {
+      Expect.call(Either.Right(21)).toEqual(Either.Right(21))
+      Expect.call(Either.Left("Here be dragons")).toEqual(Either.Left("Here be dragons"))
+
+      Expect.call(Either.Right(21)).not.toEqual(Either.Left(21))
+      Expect.call(Either.Left("Do Re Mi")).not.toEqual(Either.Right("Do Re Mi"))
+
+      Expect.call(Either.Right(36)).not.toEqual(Either.Right(29))
+      Expect.call(Either.Left(64)).not.toEqual(Either.Left(32))
     }
   }
 }
