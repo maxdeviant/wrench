@@ -29,22 +29,30 @@ class Tree is Union {
 
 var TestUnion = Suite.new("Union") {|it|
   it.suite(".match") {|it|
-    it.should("match") {
-      var leafTree = Tree.new(Leaf.new())
+    it.should("match on the cases") {
       Expect.call(
-        leafTree.match({
+        Tree.new(Leaf.new()).match({
           Leaf: Fn.new {"This is a leaf."},
           Node: Fn.new {"This is a node."}
         })
       ).toEqual("This is a leaf.")
 
-      var nodeTree = Tree.new(Node.new(5, Leaf.new(), Leaf.new()))
       Expect.call(
-        nodeTree.match({
-          Leaf: Fn.new {-1},  
+        Tree.new(Node.new(5, Leaf.new(), Leaf.new())).match({
+          Leaf: Fn.new {-1},
           Node: Fn.new {|node| node.value}
         })
       ).toEqual(5)
+    }
+
+    it.should("require exhaustive matches") {
+      Expect.call(
+        Fiber.new {
+          Tree.new(Leaf.new()).match({
+            Leaf: Fn.new {"This is a leaf."}
+          })
+        }
+      ).toBeARuntimeError("Union.match: Match not exhaustive; missing \"Node\".")
     }
   }
 }
