@@ -1,7 +1,7 @@
-import "wren-test" for Expect, Suite, ConsoleReporter
+import "wren-test" for Expect, Suite
 import "either" for Either
 
-var EitherTests = Suite.new("Either") {|it|
+var TestEither = Suite.new("Either") {|it|
   it.suite(".Right") {|it|
     it.should("produce a Right") {
       Expect.call(Either.Right("Hello")).toBe(Either)
@@ -98,10 +98,4 @@ var EitherTests = Suite.new("Either") {|it|
       Expect.call(Either.Left(64)).not.toEqual(Either.Left(32))
     }
   }
-}
-
-{
-  var reporter = ConsoleReporter.new()
-  EitherTests.run(reporter)
-  reporter.epilogue()
 }
