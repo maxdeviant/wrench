@@ -34,7 +34,7 @@ class Node is Case {
     _right = right
   }
 
-  value { _value }
+  match(fn) { fn.call(_value, _left, _right) }
 }
 
 var TestUnion = Suite.new("Union") {|it|
@@ -50,7 +50,7 @@ var TestUnion = Suite.new("Union") {|it|
       Expect.call(
         Tree.Node(5, Tree.Leaf(), Tree.Leaf()).match({
           Leaf: Fn.new {-1},
-          Node: Fn.new {|node| node.value}
+          Node: Fn.new {|value| value}
         })
       ).toEqual(5)
     }

@@ -13,7 +13,7 @@ class Union {
 
     for (key in matchers.keys) {
       if (_cases.contains(key) && _value.identifier == key) {
-        return matchers[key].call(_value)
+        return _value.match(matchers[key])
       }
     }
 
@@ -29,4 +29,6 @@ class Case {
   }
 
   identifier { _identifier }
+
+  match(fn) { fn.call() }
 }
