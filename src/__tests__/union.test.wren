@@ -1,4 +1,4 @@
-import "wren-test" for Expect, Suite
+import "wren-test" for Expect, Suite, Stub
 import "union" for Union, Case
 
 class Tree is Union {
@@ -87,7 +87,15 @@ var TestCase = Suite.new("Case") {|it|
     }
   }
 
-  it.suite("toString") {|it|
+  it.suite(".match") {|it|
+    it.should("call the given function") {
+      var stub = Stub.new("Matcher")
+      Foo.new().match(stub)
+      Expect.call(stub).toHaveBeenCalledWith([])
+    }
+  }
+
+  it.suite(".toString") {|it|
     it.should("use the name of the kind") {
       Expect.call(Foo.new().toString).toEqual("Foo()")
       Expect.call(Bar.new().toString).toEqual("Bar()")
