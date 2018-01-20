@@ -12,7 +12,7 @@ class Union {
     }
 
     for (key in matchers.keys) {
-      if (_validCases.contains(key) && _case.identifier == key) {
+      if (_validCases.contains(key) && _case.kind == key) {
         return _case.match(matchers[key])
       }
     }
@@ -24,11 +24,11 @@ class Union {
 }
 
 class Case {
-  construct new(identifier) {
-    _identifier = identifier
+  construct new(kind) {
+    _kind = kind
   }
 
-  identifier { _identifier }
+  kind { _kind }
 
   match(f) { f.call() }
 }
