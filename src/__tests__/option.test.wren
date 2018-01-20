@@ -9,7 +9,7 @@ var TestOption = Suite.new("Option") {|it|
     }
 
     it.should("not allow null") {
-      Expect.call(Fiber.new {Option.Some(null)}).toBeARuntimeError("Option.Some: Value cannot be null.")
+      Expect.call(Fiber.new {Option.Some(null)}).toBeARuntimeError("Some.new: Value cannot be null.")
     }
   }
 

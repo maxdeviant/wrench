@@ -1,66 +1,72 @@
 import "invariant" for Invariant
+import "union" for Union, Case
 
-class Option {
-  construct Some(value) {
-    Invariant.check(value != null, "Option.Some: Value cannot be null.")
-    _kind = "some"
-    _value = value
+class Option is Union {
+  static Some(value) {
+    return Option.new(Some.new(value))
   }
 
-  construct None() {
-    _kind = "none"
+  static None() {
+    return Option.new(None.new())
   }
 
-  isSome { _kind == "some" }
+  construct new(case) {
+    super([Some, None], case)
+    _case = case
+  }
 
-  isNone { _kind == "none" }
+  isSome { _case is Some }
+
+  isNone { _case is None }
 
   bind(f) {
-    if (isSome) {
-      return f.call(_value)
-    } else {
-      return Option.None()
-    }
+    return match({
+      Some: Fn.new {|value| f.call(value)},
+      None: Fn.new {Option.None()}
+    })
   }
 
   map(f) {
     return bind(Fn.new {|s| Option.Some(f.call(s))})
   }
 
-  match(matchers) {
-    var someFn = matchers["Some"]
-    Invariant.check(someFn is Fn, "Option.match: Must provide a \"Some\" case.")
-    var noneFn = matchers["None"]
-    Invariant.check(noneFn is Fn, "Option.match: Must provide a \"None\" case.")
-    if (isSome) {
-      return someFn.call(_value)
-    } else {
-      return noneFn.call()
-    }
-  }
+  toString { _case.toString }
 
-  toString {
-    if (isSome) {
-      return "Some(%(_value))"
-    } else {
-      return "None()"
-    }
-  }
-
+  // @TODO See if we can move this up into Union.
   ==(other) {
     return match({
-      "Some": Fn.new {|some|
+      Some: Fn.new {|some|
         return other.match({
-          "Some": Fn.new {|otherSome| some == otherSome},
-          "None": Fn.new {false}
+          Some: Fn.new {|otherSome| some == otherSome},
+          None: Fn.new {false}
         })
       },
-      "None": Fn.new {
+      None: Fn.new {
         return other.match({
-          "Some": Fn.new {false},
-          "None": Fn.new {true}
+          Some: Fn.new {false},
+          None: Fn.new {true}
         })
       }
     })
   }
+}
+
+class Some is Case {
+  construct new(value) {
+    Invariant.check(value != null, "Some.new: Value cannot be null.")
+    super(Some)
+    _value = value
+  }
+
+  match(f) { f.call(_value) }
+
+  toString { "Some(%(_value))" }
+}
+
+class None is Case {
+  construct new() {
+    super(None)
+  }
+
+  toString { "None()" }
 }
