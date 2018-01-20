@@ -66,3 +66,31 @@ var TestUnion = Suite.new("Union") {|it|
     }
   }
 }
+
+class Foo is Case {
+  construct new() {
+    super(Foo)
+  }
+}
+
+class Bar is Case {
+  construct new() {
+    super(Bar)
+  }
+}
+
+var TestCase = Suite.new("Case") {|it|
+  it.suite("==") {|it|
+    it.should("compare based on the kind") {
+      Expect.call(Foo.new()).toEqual(Foo.new())
+      Expect.call(Foo.new()).not.toEqual(Bar.new())
+    }
+  }
+
+  it.suite("toString") {|it|
+    it.should("use the name of the kind") {
+      Expect.call(Foo.new().toString).toEqual("Foo()")
+      Expect.call(Bar.new().toString).toEqual("Bar()")
+    }
+  }
+}

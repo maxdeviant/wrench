@@ -31,4 +31,8 @@ class Case {
   kind { _kind }
 
   match(f) { f.call() }
+
+  ==(other) { kind == other.kind }
+
+  toString { "%(kind.name)()" }
 }

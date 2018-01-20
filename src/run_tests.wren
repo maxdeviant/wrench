@@ -4,7 +4,7 @@ import "__tests__/either.test" for TestEither
 import "__tests__/functional.test" for TestFunctional
 import "__tests__/invariant.test" for TestInvariant
 import "__tests__/option.test" for TestOption
-import "__tests__/union.test" for TestUnion
+import "__tests__/union.test" for TestUnion, TestCase
 
 var reporter = ConsoleReporter.new()
 
@@ -13,7 +13,8 @@ var suites = [
   TestFunctional,
   TestInvariant,
   TestOption,
-  TestUnion
+  TestUnion,
+  TestCase
 ]
 
 for (suite in suites) {
