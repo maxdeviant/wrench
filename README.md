@@ -17,3 +17,11 @@ import "wrench" for Option
 // Now you're ready to write some code!
 System.print(Option.Some("Hello, Sailor!"))
 ```
+
+## Contributing
+
+### Running Tests
+
+```sh
+$ ~/path/to/wren src/run_tests.wren
+```
