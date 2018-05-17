@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0)
 
 ## [Unreleased]
 
-## [0.0.1] - 2018-01-19
-### Added
-- `Invariant`
-- `Option` and `Either` monads
+### Changed
 
-[Unreleased]: https://github.com/maxdeviant/wrench/compare/v0.0.1...HEAD
+* Renamed `Either` to `Result`
+
+## [0.0.1] - 2018-01-19
+
+### Added
+
+* `Invariant`
+* `Option` and `Either` monads
+
+[unreleased]: https://github.com/maxdeviant/wrench/compare/v0.0.1...HEAD
 [0.0.1]: https://github.com/maxdeviant/wrench/compare/f947fb8...v0.0.1
