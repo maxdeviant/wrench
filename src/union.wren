@@ -11,6 +11,7 @@ class Union {
       Invariant.check(matchers.containsKey(case), "%(this.toString).match: Match not exhaustive; missing %(case).")
     }
 
+    // @TODO: Add invariant to check if `_case.kind` is null.
     for (key in matchers.keys) {
       if (_validCases.contains(key) && _case.kind == key) {
         return _case.match(matchers[key])
