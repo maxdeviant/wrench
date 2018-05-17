@@ -16,7 +16,7 @@ var files = [
   "functional.wren",
   "union.wren",
   "option.wren",
-  "either.wren"
+  "result.wren"
 ]
 
 var wrenchBundle = files.map {|file|
